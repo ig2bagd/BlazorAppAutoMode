@@ -1,0 +1,30 @@
+﻿@page "/"
+@using BlazorAppAutoMode.Client.Services
+
+<PageTitle>Home</PageTitle>
+
+<div style="text-align: center">
+    <h1>Weather for London</h1>
+    <p>temperature (C): @current_weather_temperature</p>
+    <p>wind speed: @current_weather_windspeed</p>
+    <p>wind direction: @current_weather_winddirection</p>
+</div>
+
+@code {
+    [Inject]
+    IDataService? dataService { get; set; }
+
+    private decimal current_weather_temperature;
+    private decimal current_weather_windspeed;
+    private decimal current_weather_winddirection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("OnInitializedAsync");
+        var data = await dataService.GetData();
+
+        current_weather_temperature = data?.current_weather?.temperature ?? 0;
+        current_weather_windspeed = data?.current_weather?.windspeed ?? 0;
+        current_weather_winddirection = data?.current_weather?.winddirection ?? 0;
+    }
+}
