@@ -14,9 +14,13 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 // Registration and configuration for a typed client must be done both in server and client projects
+var baseAddress = builder.Configuration["BaseAddress"];
+//builder.Configuration.GetValue<string>("BaseAddress", "default_value") allows you to specify a default value that will be returned if the key is not found in the configuration.
 builder.Services.AddHttpClient<IDataService, DataService>("api", (HttpClient client) =>
 {
-    client.BaseAddress = new Uri("https://localhost:7037");
+    //https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-8.0
+    //client.BaseAddress = new Uri("https://localhost:7037");
+    client.BaseAddress = new Uri(baseAddress!);
 });
 
 builder.Services.AddHttpClient<IOpenMeteoService, OpenMeteoService>("open-meteo", (HttpClient client) =>
@@ -25,6 +29,7 @@ builder.Services.AddHttpClient<IOpenMeteoService, OpenMeteoService>("open-meteo"
 });
 
 builder.Services.AddControllers();
+//builder.Services.AddEndpointsApiExplorer();           // for Swagger with minimal APIs               
 
 var app = builder.Build();
 
