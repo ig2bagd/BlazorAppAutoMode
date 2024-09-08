@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-builder.Services.AddHttpClient<IDataService, DataService>("api", (HttpClient client) =>
+builder.Services.AddHttpClient<IDataService, DataService>((HttpClient client) =>
 {
     //https://learn.microsoft.com/en-us/aspnet/core/blazor/fundamentals/configuration?view=aspnetcore-8.0#app-settings-configuration
     //client.BaseAddress = new Uri("https://localhost:7037");
