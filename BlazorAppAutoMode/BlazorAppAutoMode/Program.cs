@@ -1,6 +1,9 @@
+using BlazorAppAutoMode;
 using BlazorAppAutoMode.Client.Services;
 using BlazorAppAutoMode.Components;
 using BlazorAppAutoMode.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 // Create Blazor project with Interactive Auto render mode in .NET 8 (Authorised Territory)
 // https://www.youtube.com/watch?v=T0Wt6PqmQPk
@@ -12,15 +15,44 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+// https://www.milanjovanovic.tech/blog/adding-validation-to-the-options-pattern-in-asp-net-core
+// https://andrewlock.net/adding-validation-to-strongly-typed-configuration-objects-in-dotnet-6/
+// https://andrewlock.net/adding-validation-to-strongly-typed-configuration-objects-using-flentvalidation/
+
+builder.Services.AddOptions<AppOptions>()
+    .BindConfiguration(AppOptions.ConfigurationSection)
+    .ValidateDataAnnotations()
+    .Validate(settings =>                   // Custom validation rules
+    {
+        if (string.IsNullOrEmpty(settings.AccessToken)) return false;
+        return true;
+    })
+    .ValidateOnStart();
+
 // Registration and configuration for a typed client must be done both in server and client projects
 var baseAddress = builder.Configuration["BaseAddress"];
 //builder.Configuration.GetValue<string>("BaseAddress", "default_value") allows you to specify a default value that will be returned if the key is not found in the configuration.
-builder.Services.AddHttpClient<IDataService, DataService>((HttpClient client) =>
+// The RIGHT Way To Use HttpClient In .NET
+// https://www.youtube.com/watch?v=g-JGay_lnWI
+builder.Services.AddHttpClient<IDataService, DataService>((serviceProvider, httpClient) =>
 {
+    var settings = serviceProvider.GetRequiredService<IOptions<AppOptions>>().Value;
+
     //https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-8.0
-    //client.BaseAddress = new Uri("https://localhost:7037");
-    client.BaseAddress = new Uri(baseAddress!);
-});
+    //httpClient.BaseAddress = new Uri("https://localhost:7037");
+    //httpClient.BaseAddress = new Uri(baseAddress!);
+
+    httpClient.BaseAddress = new Uri(settings.BaseAddress);
+})
+.ConfigurePrimaryHttpMessageHandler(() =>                   // Use transient typed client in Singleton service
+{
+    return new SocketsHttpHandler
+    {
+        PooledConnectionLifetime = TimeSpan.FromMinutes(5)
+    };
+})
+.SetHandlerLifetime(Timeout.InfiniteTimeSpan);
+
 
 builder.Services.AddHttpClient<IOpenMeteoService, OpenMeteoService>((HttpClient client) =>
 {
