@@ -1,7 +1,12 @@
 ﻿@page "/"
 @using BlazorAppAutoMode.Client.Services
 
+
 <PageTitle>Home</PageTitle>
+
+Render @(OperatingSystem.IsBrowser() ? "Wasm" : "Server")
+
+<RenderContextState />
 
 <div style="text-align: center">
     <h1>Weather for London</h1>
