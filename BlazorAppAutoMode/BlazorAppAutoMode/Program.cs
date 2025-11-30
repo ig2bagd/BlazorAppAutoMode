@@ -2,6 +2,7 @@ using BlazorAppAutoMode;
 using BlazorAppAutoMode.Client.Services;
 using BlazorAppAutoMode.Components;
 using BlazorAppAutoMode.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -62,7 +63,12 @@ builder.Services.AddHttpClient<IOpenMeteoService, OpenMeteoService>((HttpClient 
 builder.Services.AddControllers();
 //builder.Services.AddEndpointsApiExplorer();           // for Swagger with minimal APIs               
 
+var baseUrl = builder.Configuration.GetValue<string>("BaseUrl", "/");
+builder.Services.AddSingleton(new AppNavigationOptions { BaseUrl = baseUrl! });
+
+
 var app = builder.Build();
+//app.UsePathBase(baseUrl);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

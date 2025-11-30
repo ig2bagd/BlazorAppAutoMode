@@ -26,10 +26,18 @@ Render @(OperatingSystem.IsBrowser() ? "Wasm" : "Server")
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("OnInitializedAsync");
-        var data = await dataService.GetData();
 
-        current_weather_temperature = data?.current_weather?.temperature ?? 0;
-        current_weather_windspeed = data?.current_weather?.windspeed ?? 0;
-        current_weather_winddirection = data?.current_weather?.winddirection ?? 0;
+        if (dataService != null)
+        {
+            var data = await dataService.GetData();
+
+            current_weather_temperature = data?.current_weather?.temperature ?? 0;
+            current_weather_windspeed = data?.current_weather?.windspeed ?? 0;
+            current_weather_winddirection = data?.current_weather?.winddirection ?? 0;
+        }
+        else
+        {
+            Console.WriteLine("dataService is null");
+        }
     }
 }
